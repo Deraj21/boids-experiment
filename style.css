@@ -1,0 +1,11 @@
+body {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  background-color: whitesmoke;
+}
+
+#canvas {
+  background-color: white;
+  border: 1px solid gray;
+}
