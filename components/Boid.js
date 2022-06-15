@@ -10,12 +10,15 @@ const boidPoints = [
         { x: -1, y:  1 }
     ],
     scale = 5,
-    turnSpeed = .06,
-    speed = 4,
+    turnSpeed = 1 / 500,
+    speed = 3,
     NINETY = Math.PI / 2,
     sightRange = 70,
-    seperateDistance = 15,
-    mousePull = 5
+    separateDistance = 20,
+    separateScale = 7,
+    cohesionScale = 1,
+    alignScale = 20,
+    mousePull = 15
 
 class Boid {
     constructor(x, y, r, followMouse, debug){
@@ -33,20 +36,30 @@ class Boid {
 
         boids.forEach(b => {
             let distance = this.position.subtract(b.position).magnitude()
+            if (this.position.x === b.position.x && this.position.y === b.position.y){
+            } else if (distance < separateDistance){
+                positionTotal = positionTotal.add( this.position.subtract(b.position) )
+                n++
+            } else {
+            }
+        })
 
-            if (distance < 2){
-                console.log('hi')
-            } else if (distance < seperateDistance){
-                positionTotal.add( this.position.subtract(b.position) )
+        return positionTotal
+    }
+
+    alignment(boids) {
+        let rotationTotal = 0
+        let n = 0
+
+        boids.forEach(b => {
+            let distance = this.position.subtract(b.position).magnitude()
+            if (distance < sightRange){
+                rotationTotal += b.rotation
                 n++
             }
         })
 
-        return positionTotal//.scale(1 / n)
-    }
-
-    alignment(boids) {
-
+        return new Vector(rotationTotal / n)
     }
 
     cohesion(boids) {
@@ -66,19 +79,52 @@ class Boid {
         return positionTotal.scale(1 / n)
     }
 
+    applyRules(boids) {
+        let cohesionTotal = new Vector(0, 0)
+        let rotationTotal = 0
+        let separationTotal = new Vector(0, 0)
+
+        let numWithinSight = 0
+        let numWithinSeparate = 0
+
+        boids.forEach(b => {
+            let distance = this.position.subtract(b.position).magnitude()
+            if (this.position.x === b.position.x && this.position.y === b.position.y){
+                // skip
+            } else if (distance < separateDistance){
+                separationTotal = separationTotal.add( this.position.subtract(b.position) )
+                numWithinSeparate++
+            }
+            if (distance < sightRange){
+                cohesionTotal = cohesionTotal.add(b.position)
+                rotationTotal += b.rotation
+                numWithinSight++
+            }
+        })
+
+        let cohesionVector = cohesionTotal.subtract(this.position).scale(1 / numWithinSight * cohesionScale)
+        let alignmentVector = new Vector(rotationTotal / numWithinSight).scale(alignScale)
+        let separationVector = separationTotal.scale(separateScale)
+
+        return cohesionVector.add(alignmentVector).add(separationVector)
+    }
+
     updateRotation(boids){
         const { rotation, position, followMouse, debug } = this
         let newPosition = new Vector(0, 0)
-        let changeRotation = false
+        // let changeRotation = false
 
-        this.cohesionVector = this.cohesion(boids).subtract(position)
-        newPosition = newPosition.add(this.cohesionVector)
-        changeRotation = true
+        // this.cohesionVector = this.cohesion(boids).subtract(position).scale(cohesionScale)
+        // newPosition = newPosition.add(this.cohesionVector)
+        // changeRotation = true
 
-        if (debug){
-            this.separationVector = this.separation(boids)//.subtract(position)
-            this.separationVector.print()
-        }
+        // this.separationVector = this.separation(boids).scale(separateScale)
+        // newPosition = newPosition.add(this.separationVector)
+
+        // this.alignmentVector = this.alignment(boids).scale(alignScale)
+        // newPosition = newPosition.add(this.alignmentVector)
+        
+        newPosition = newPosition.add( this.applyRules(boids) )
 
         if (followMouse){
             this.mouseVector = Input.mouse.position.subtract(position).normalize().scale(mousePull)
@@ -86,17 +132,14 @@ class Boid {
             changeRotation = true
         }
 
-        this.newPosition = newPosition
 
-        if (changeRotation){
-            // get 'right' vector
-            let right = new Vector(rotation)
-            // call dot product on it to get the sign
-            let dotProd = right.dot(newPosition)
-            let sign = dotProd > 0 ? 1 : dotProd < 0 ? -1 : 0
-            // apply rotation
-            this.rotation += turnSpeed * sign
-        }
+        // get 'right' vector
+        let right = new Vector(rotation)
+        // call dot product on it to get the sign
+        let dotProd = right.dot(newPosition)
+        let sign = dotProd > 0 ? 1 : dotProd < 0 ? -1 : 0
+        // apply rotation
+        this.rotation += turnSpeed * dotProd
         
     }
 
@@ -114,12 +157,12 @@ class Boid {
 
         Draw.restore()
 
-        if (this.debug){
-            Draw.transform(this.position, 0)
-            this.separationVector.draw()
-            Draw.drawShield({X:0, y:0}, 0, seperateDistance / 6)
-            Draw.restore()
-        }
+        // if (this.debug){
+        //     Draw.transform(this.position, 0)
+        //     this.alignmentVector.draw("green")
+        //     Draw.drawShield({X:0, y:0}, 0, sightRange / 6)
+        //     Draw.restore()
+        // }
     }
 }
 

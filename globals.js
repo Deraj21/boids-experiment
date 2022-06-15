@@ -7,7 +7,7 @@ const canvas = document.querySelector("canvas"),
 
 export default {
     canvas, ctx, H, W,
-    FPS: 24,
+    FPS: 60,
     STROKE_STYLE: "black",
     FILL_STYLE: "black",
     FONT: {

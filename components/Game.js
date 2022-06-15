@@ -21,7 +21,7 @@ class Game {
     }
 
     loop() {
-        if (!this.paused){
+        if (!this.paused || this.pauseNextFrame){
             // get input
     
             // apply inputs
@@ -32,6 +32,14 @@ class Game {
     
             // draw
             this.draw()
+
+            if (this.pauseNextFrame){
+                this.paused = true
+                this.pauseNextFrame = false
+            }
+        } else if (Input.keysDown["n"]){
+            this.paused = false
+            this.pauseNextFrame = true
         }
     }
 
@@ -42,7 +50,7 @@ class Game {
         this.boids = []
         for (let i = 0; i < numBoids; i++){
             let { x, y } = randomPosition()
-            this.boids.push( new Boid(x, y, randomRotation(), false, i == 0 ) )
+            this.boids.push( new Boid(x, y, randomRotation(), false, false) )
         }
     }
 
