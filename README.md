@@ -1,4 +1,8 @@
+<!-- <link href="https://raw.githubusercontent.com/jasonm23/markdown-css-themes/gh-pages/avenir-white.css" rel="stylesheet" /> -->
+
 # Boids!
+
+![project screenshot](project-screenshot.png)
 
 [what are boids?](https://cs.stanford.edu/people/eroberts/courses/soco/projects/2008-09/modeling-natural-systems/boids.html)
 
@@ -14,3 +18,13 @@
 - [ ] when paused, user can click on a specific boid, in order to turn on "debug mode" for it.
 
 
+
+<!-- (setq markdown-css-paths '("./readme-style.css")) -->
+
+<!-- <style>
+
+body {
+  background-color: pink
+}
+
+</style> -->
